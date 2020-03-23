@@ -16,6 +16,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -38,9 +40,9 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject insideArray = (JSONObject) jsonArray.get(i);
                     weatherTextView.setText(insideArray.get("description").toString().toUpperCase());
                 }
-                InputMethodManager inputManager = (InputMethodManager) this.getSystemService(INPUT_METHOD_SERVICE);
-                assert inputManager != null;
-                inputManager.hideSoftInputFromWindow(Objects.requireNonNull(this.getCurrentFocus()).getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
+                InputMethodManager manager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                assert manager != null;
+                manager.hideSoftInputFromWindow(cityEditText.getWindowToken(), 0);
             } catch (Exception e) {
                 weatherTextView.setText("I couldn't find the city.\nPlease try again...");
                 e.printStackTrace();
@@ -48,10 +50,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
     private String getUrlAsString() {
-        return "https://api.openweathermap.org/data/2.5/weather?q=" +
-                cityEditText.getText().toString().toLowerCase().replaceAll(" ", "%20") +
-                "&appid=" +
-                WEATHER_APP_ID;
+        try {
+            String urlEncoder = URLEncoder.encode(cityEditText.getText().toString(), "UTF-8");
+
+            return "https://api.openweathermap.org/data/2.5/weather?q=" +
+                    urlEncoder +
+                    "&appid=" +
+                    WEATHER_APP_ID;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
